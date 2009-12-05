@@ -71,11 +71,7 @@ class TemplateJuggler
 				base_a.pop
 				break if base_a.empty?
 			end
-			if next_id
-				id_a = next_id.split '/'
-			else
-				id_a = base_a + ['autohandler']
-			end
+			id_a = next_id ? next_id.split('/') : (base_a + ['autohandler'])
 		end
 		body
 	end
