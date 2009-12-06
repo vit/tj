@@ -5,12 +5,12 @@ class TemplateJuggler
 	# Экземпляр этого класса работает загрузчиком шаблонов, считая, что id шаблона соответствует именем файла
 	# (с подкаталогами) внутри заданного каталога.
 	class SimpleLoader
-		attr_accessor :views_dir
+		attr_accessor :path
 		def initialize path='./views'
-			@views_dir = path
+			@path = path
 		end
 		def get id
-			path = File.join(@views_dir, "#{id}.haml")
+			path = File.join(@path, "#{id}.haml")
 			File::exists?(path) && File::readable?(path) ? File::open(path, 'r'){ |file| file.read } : nil
 		end
 	end
