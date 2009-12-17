@@ -1,6 +1,13 @@
 # coding: UTF-8
 %w[haml yaml].each {|r| require r}
 
+
+def YAML.load_file( filepath )
+	File.open( filepath, "r:utf-8" ) do |f|
+		load( f )
+	end
+end
+
 class TemplateJuggler
 
 	# Экземпляр этого класса работает загрузчиком шаблонов, считая, что id шаблона соответствует именем файла
@@ -12,7 +19,7 @@ class TemplateJuggler
 		end
 		def get_template id
 			path = File.join(@path, "#{id}.haml")
-			File::exists?(path) && File::readable?(path) ? File::open(path, 'r'){ |file| file.read } : nil
+			File::exists?(path) && File::readable?(path) ? File::open(path, 'r:utf-8') { |file| file.read } : nil
 		end
 		def get_locale lang, id
 			lang = [lang.to_s] unless lang.is_a? Array
@@ -20,7 +27,8 @@ class TemplateJuggler
 			-> s {
 				locale_data = lang.inject({}) do |acc,l|
 					path = File.join(@path, "#{id}.#{l}.yaml")
-					data = File::exists?(path) && File::readable?(path) ? YAML.load_file( path ) : nil
+					#data = File::exists?(path) && File::readable?(path) ? YAML.load_file( path ) : nil
+					data = File::exists?(path) && File::readable?(path) ? File::open(path, 'r:utf-8') { |file| YAML.load file.read } : nil
 					data.is_a?(Hash) ? data.merge(acc) : acc
 				end unless locale_data
 				locale_data[s.to_s] if locale_data
@@ -86,7 +94,7 @@ class TemplateJuggler
 				scope.locale = @locale_loader.get_locale scope.lang, id
 				scope.current_template = id
 				scope.next_template = nil
-				body = Haml::Engine.new(templ).render(scope, locals) { body }
+				body = Haml::Engine.new(templ, :encoding => 'utf-8').render(scope, locals) { body }.force_encoding('utf-8')
 				scope.current_template = nil
 				next_id = scope.next_template if scope.respond_to?(:next_template)
 			end
@@ -101,5 +109,4 @@ class TemplateJuggler
 end
 
 TJ = TemplateJuggler
-
 
